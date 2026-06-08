@@ -1,0 +1,26 @@
+name: LangChain
+description: Framework for building LLM applications
+homepage: https://github.com/langchain-ai/langchain
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.9"
+  disk_mb: 500
+
+dependencies:
+  python:
+    - langchain
+    - langchain-openai
+    - chromadb
+
+installation:
+  binary: python
+  version_cmd: python -c "import langchain; print(langchain.__version__)"
+
+functionality:
+  - name: 导入测试
+    cmd: python -c "from langchain.llms import OpenAI; print('OK')"
+    expect_rc: 0
+  - name: 向量存储
+    cmd: python -c "import chromadb; print(chromadb.__version__)"
+    expect_rc: 0

@@ -1,0 +1,20 @@
+name: Git
+description: Version control system
+
+system:
+  os: [windows, macos, linux]
+
+installation:
+  binary: git
+  version_cmd: git --version
+
+functionality:
+  - name: 版本
+    cmd: git --version
+    expect_rc: 0
+  - name: 全局配置
+    cmd: git config --global user.name
+    expect_rc: 0
+  - name: SSH Key
+    cmd: git config --global user.email
+    expect_rc: 0

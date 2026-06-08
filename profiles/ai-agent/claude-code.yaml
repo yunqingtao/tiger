@@ -1,0 +1,26 @@
+name: Claude Code
+description: Anthropic CLI coding assistant
+homepage: https://docs.anthropic.com/en/docs/claude-code
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 200
+
+dependencies:
+  external:
+    - name: Node.js
+      check: node --version
+      install_windows: winget install OpenJS.NodeJS
+      install_macos: brew install node
+
+installation:
+  binary: claude
+  version_cmd: claude --version
+
+functionality:
+  - name: 帮助命令
+    cmd: claude --help
+    expect_rc: 0
+  - name: 版本验证
+    cmd: claude --version
+    expect_rc: 0

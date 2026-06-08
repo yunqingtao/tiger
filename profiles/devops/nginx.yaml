@@ -1,0 +1,22 @@
+name: nginx
+description: Web server / reverse proxy
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 100
+
+installation:
+  binary: nginx
+  version_cmd: nginx -v
+
+ports:
+  - 80
+  - 443
+
+functionality:
+  - name: 版本
+    cmd: nginx -v
+    expect_rc: 0
+  - name: 配置语法
+    cmd: nginx -t
+    expect_rc: 0

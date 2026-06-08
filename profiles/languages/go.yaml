@@ -1,0 +1,25 @@
+name: Go
+description: Go programming language
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 500
+
+dependencies:
+  external:
+    - name: Go
+      check: go version
+      install_windows: winget install GoLang.Go
+      install_macos: brew install go
+
+installation:
+  binary: go
+  version_cmd: go version
+
+functionality:
+  - name: 版本
+    cmd: go version
+    expect_rc: 0
+  - name: 编译测试
+    cmd: go run -e 'package main; import "fmt"; func main() { fmt.Println("OK") }'
+    expect_rc: 0

@@ -1,0 +1,26 @@
+name: Rust
+description: Rust programming language
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 1000
+
+dependencies:
+  external:
+    - name: Rust (rustc)
+      check: rustc --version
+      install_windows: winget install Rustlang.Rustup
+      install_macos: brew install rustup-init && rustup-init -y
+      install_linux: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+installation:
+  binary: rustc
+  version_cmd: rustc --version
+
+functionality:
+  - name: rustc
+    cmd: rustc --version
+    expect_rc: 0
+  - name: cargo
+    cmd: cargo --version
+    expect_rc: 0

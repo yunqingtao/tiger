@@ -1,0 +1,29 @@
+name: Java JDK
+description: Java Development Kit
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 500
+
+dependencies:
+  external:
+    - name: Java
+      check: java --version
+      install_windows: winget install Oracle.JDK.17
+      install_macos: brew install openjdk@17
+      install_linux: sudo apt-get install -y openjdk-17-jdk
+
+installation:
+  binary: java
+  version_cmd: java --version
+
+ports:
+  - 8080
+
+functionality:
+  - name: java
+    cmd: java --version
+    expect_rc: 0
+  - name: javac
+    cmd: javac --version
+    expect_rc: 0

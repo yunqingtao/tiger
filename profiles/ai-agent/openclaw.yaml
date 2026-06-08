@@ -1,0 +1,34 @@
+name: OpenClaw Gateway
+description: AI Gateway for multi-channel messaging
+homepage: https://github.com/nousresearch/openclaw
+
+system:
+  os: [linux, macos, windows]
+  arch: [amd64, arm64]
+  disk_mb: 200
+
+dependencies:
+  external:
+    - name: Node.js
+      check: node --version
+      install_windows: winget install OpenJS.NodeJS
+      install_macos: brew install node
+      install_linux: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs
+
+installation:
+  binary: openclaw
+  version_cmd: openclaw --version
+
+ports:
+  - 18889
+  - 18789
+  - 3000
+
+functionality:
+  - name: 帮助命令
+    cmd: openclaw --help
+    expect_rc: 0
+  - name: Gateway状态
+    cmd: openclaw status
+    expect_rc: 0
+    timeout: 10

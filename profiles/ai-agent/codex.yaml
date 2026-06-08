@@ -1,0 +1,26 @@
+name: OpenAI Codex CLI
+description: OpenAI CLI coding agent
+homepage: https://github.com/openai/codex
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 200
+
+dependencies:
+  external:
+    - name: Node.js
+      check: node --version
+      install_windows: winget install OpenJS.NodeJS
+      install_macos: brew install node
+
+installation:
+  binary: codex
+  version_cmd: codex --version
+
+functionality:
+  - name: 帮助命令
+    cmd: codex --help
+    expect_rc: 0
+  - name: 版本验证
+    cmd: codex --version
+    expect_rc: 0

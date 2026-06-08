@@ -1,0 +1,34 @@
+name: Ollama
+description: Local LLM runner
+homepage: https://github.com/ollama/ollama
+
+system:
+  os: [windows, macos, linux]
+  arch: [amd64, arm64]
+  memory_mb: 8192
+  disk_mb: 10000
+
+dependencies:
+  external:
+    - name: Ollama CLI
+      check: ollama --version
+      install_windows: winget install Ollama.Ollama
+      install_macos: brew install ollama
+      install_linux: curl -fsSL https://ollama.com/install.sh | sh
+
+installation:
+  binary: ollama
+  version_cmd: ollama --version
+
+ports:
+  - 11434
+
+functionality:
+  - name: 服务状态
+    cmd: ollama list
+    expect_rc: 0
+    timeout: 10
+  - name: API端口
+    cmd: curl -s http://127.0.0.1:11434/api/tags
+    expect_rc: 0
+    timeout: 5

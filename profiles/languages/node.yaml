@@ -1,0 +1,35 @@
+name: Node.js
+description: JavaScript runtime
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 300
+
+dependencies:
+  npm:
+    - pm2
+  external:
+    - name: Node.js
+      check: node --version
+      install_windows: winget install OpenJS.NodeJS
+      install_macos: brew install node
+      install_linux: curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs
+
+installation:
+  binary: node
+  version_cmd: node --version
+
+ports:
+  - 3000
+  - 5173
+
+functionality:
+  - name: 版本
+    cmd: node --version
+    expect_rc: 0
+  - name: npm
+    cmd: npm --version
+    expect_rc: 0
+  - name: 脚本执行
+    cmd: node -e "console.log('OK')"
+    expect_rc: 0

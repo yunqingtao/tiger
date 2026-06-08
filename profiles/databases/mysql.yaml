@@ -1,0 +1,26 @@
+name: MySQL
+description: Relational database
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 500
+
+dependencies:
+  python:
+    - mysql-connector-python
+
+installation:
+  binary: mysql
+  version_cmd: mysql --version
+
+ports:
+  - 3306
+
+functionality:
+  - name: 版本
+    cmd: mysql --version
+    expect_rc: 0
+  - name: 服务状态
+    cmd: mysqladmin ping -h 127.0.0.1
+    expect_rc: 0
+    timeout: 5

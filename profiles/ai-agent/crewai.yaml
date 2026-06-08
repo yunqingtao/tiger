@@ -1,0 +1,26 @@
+name: CrewAI
+description: Multi-agent orchestration framework
+homepage: https://github.com/crewAIInc/crewAI
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.10"
+  disk_mb: 300
+
+dependencies:
+  python:
+    - crewai
+    - langchain
+
+installation:
+  binary: python
+  version_cmd: python -c "import crewai; print(crewai.__version__)"
+
+functionality:
+  - name: 导入测试
+    cmd: python -c "from crewai import Agent, Task, Crew; print('OK')"
+    expect_rc: 0
+  - name: Agent创建
+    cmd: python -c "from crewai import Agent; a=Agent(role='test',goal='test',backstory='test'); print('OK')"
+    expect_rc: 0
+    timeout: 15

@@ -1,0 +1,21 @@
+name: SQLite
+description: Embedded database
+
+system:
+  os: [windows, macos, linux]
+
+dependencies:
+  python:
+    - sqlite3
+
+installation:
+  binary: sqlite3
+  version_cmd: sqlite3 --version
+
+functionality:
+  - name: 版本
+    cmd: sqlite3 --version
+    expect_rc: 0
+  - name: 读写测试
+    cmd: python -c "import sqlite3;c=sqlite3.connect(':memory:');c.execute('CREATE TABLE t(x)');c.execute('INSERT INTO t VALUES(1)');print(c.execute('SELECT * FROM t').fetchone())"
+    expect_rc: 0

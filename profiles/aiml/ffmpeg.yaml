@@ -1,0 +1,23 @@
+name: FFmpeg
+description: Multimedia processing
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 300
+
+installation:
+  binary: ffmpeg
+  version_cmd: ffmpeg -version
+
+functionality:
+  - name: 版本
+    cmd: ffmpeg -version
+    expect_rc: 0
+  - name: 编解码器
+    cmd: ffmpeg -codecs
+    expect_rc: 0
+    timeout: 10
+  - name: 格式支持
+    cmd: ffmpeg -formats
+    expect_rc: 0
+    timeout: 10

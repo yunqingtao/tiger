@@ -1,0 +1,30 @@
+name: Google Chrome
+description: Web browser with CDP support
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 1000
+
+dependencies:
+  external:
+    - name: Chrome
+      check: chrome --version
+      install_windows: winget install Google.Chrome
+      install_macos: brew install google-chrome
+      install_linux: wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo dpkg -i google-chrome-stable_current_amd64.deb
+
+installation:
+  binary: chrome
+  version_cmd: chrome --version
+
+ports:
+  - 9222
+
+functionality:
+  - name: 版本
+    cmd: chrome --version
+    expect_rc: 0
+  - name: CDP模式
+    cmd: chrome --headless --disable-gpu --remote-debugging-port=9222 --no-sandbox --dump-dom https://example.com
+    expect_rc: 0
+    timeout: 15

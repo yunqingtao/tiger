@@ -1,0 +1,20 @@
+name: Selenium
+description: Web browser automation
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.8"
+  disk_mb: 300
+
+dependencies:
+  python:
+    - selenium
+
+installation:
+  binary: python
+  version_cmd: python -c "import selenium; print(selenium.__version__)"
+
+functionality:
+  - name: 导入
+    cmd: python -c "from selenium import webdriver; print('OK')"
+    expect_rc: 0

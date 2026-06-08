@@ -1,0 +1,23 @@
+name: NVIDIA CUDA
+description: GPU computing platform
+
+system:
+  os: [windows, linux]
+  disk_mb: 5000
+
+installation:
+  binary: nvidia-smi
+  version_cmd: nvidia-smi --query-gpu=driver_version --format=csv,noheader
+
+functionality:
+  - name: 驱动版本
+    cmd: nvidia-smi --query-gpu=driver_version --format=csv,noheader
+    expect_rc: 0
+    timeout: 10
+  - name: GPU信息
+    cmd: nvidia-smi --query-gpu=name,memory.total --format=csv
+    expect_rc: 0
+    timeout: 10
+  - name: nvcc编译
+    cmd: nvcc --version
+    expect_rc: 0

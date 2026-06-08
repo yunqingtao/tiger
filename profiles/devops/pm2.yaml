@@ -1,0 +1,23 @@
+name: PM2
+description: Node.js process manager
+
+system:
+  os: [windows, macos, linux]
+
+dependencies:
+  external:
+    - name: Node.js
+      check: node --version
+
+installation:
+  binary: pm2
+  version_cmd: pm2 --version
+
+functionality:
+  - name: 版本
+    cmd: pm2 --version
+    expect_rc: 0
+  - name: 进程列表
+    cmd: pm2 list
+    expect_rc: 0
+    timeout: 10

@@ -1,0 +1,52 @@
+name: Hermes Agent
+description: Nous Research AI Assistant
+homepage: https://github.com/nousresearch/hermes-agent
+
+system:
+  os: [windows, macos, linux]
+  arch: [amd64, arm64]
+  python: ">=3.10"
+  disk_mb: 500
+
+dependencies:
+  python:
+    - websockets
+    - pyyaml
+    - pillow
+  external:
+    - name: Chrome
+      check: chrome --version
+      install_windows: winget install Google.Chrome
+      install_macos: brew install google-chrome
+      install_linux: wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+installation:
+  binary: hermes
+  version_cmd: hermes --version
+
+ports:
+  - 9222
+
+functionality:
+  - name: 帮助命令
+    cmd: hermes --help
+    expect_rc: 0
+  - name: 状态检查
+    cmd: hermes status
+    expect_rc: 0
+    timeout: 15
+  - name: 技能列表
+    cmd: hermes skills list
+    expect_rc: 0
+  - name: 对话测试
+    cmd: hermes chat -q "OK"
+    expect_rc: 0
+    timeout: 30
+
+skills:
+  - name: OCR 文字识别
+    check: python -c "import pytesseract"
+    install: pip install pytesseract
+  - name: 反爬引擎
+    check: python -c "import playwright"
+    install: pip install playwright && playwright install

@@ -1,0 +1,22 @@
+name: PostgreSQL
+description: Advanced relational database
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 500
+
+dependencies:
+  python:
+    - psycopg2
+
+installation:
+  binary: psql
+  version_cmd: psql --version
+
+ports:
+  - 5432
+
+functionality:
+  - name: 版本
+    cmd: psql --version
+    expect_rc: 0

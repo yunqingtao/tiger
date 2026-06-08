@@ -1,0 +1,26 @@
+name: Playwright
+description: Browser automation framework
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.8"
+  disk_mb: 500
+
+dependencies:
+  python:
+    - playwright
+
+installation:
+  binary: python
+  version_cmd: python -c "import playwright; print(playwright.__version__)"
+
+ports:
+  - 9222
+
+functionality:
+  - name: 导入
+    cmd: python -c "from playwright.sync_api import sync_playwright; print('OK')"
+    expect_rc: 0
+  - name: 浏览器驱动
+    cmd: python -c "import subprocess; r=subprocess.run(['playwright', 'install', '--dry-run'], capture_output=True); print('OK')"
+    expect_rc: 0

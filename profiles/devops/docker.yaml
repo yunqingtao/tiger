@@ -1,0 +1,28 @@
+name: Docker
+description: Container platform
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 2000
+  memory_mb: 4096
+
+installation:
+  binary: docker
+  version_cmd: docker --version
+
+ports:
+  - 2375
+  - 2376
+
+functionality:
+  - name: 版本
+    cmd: docker --version
+    expect_rc: 0
+  - name: Daemon状态
+    cmd: docker info
+    expect_rc: 0
+    timeout: 15
+  - name: 容器测试
+    cmd: docker run --rm hello-world
+    expect_rc: 0
+    timeout: 30

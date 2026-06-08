@@ -1,0 +1,28 @@
+name: Python
+description: Python runtime environment
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.9"
+  disk_mb: 500
+
+installation:
+  binary: python
+  version_cmd: python --version
+
+dependencies:
+  python:
+    - pip
+    - setuptools
+    - wheel
+
+functionality:
+  - name: 版本
+    cmd: python --version
+    expect_rc: 0
+  - name: pip
+    cmd: pip --version
+    expect_rc: 0
+  - name: 虚拟环境
+    cmd: python -c "import venv; print('OK')"
+    expect_rc: 0

@@ -1,0 +1,29 @@
+name: PyTorch
+description: Deep learning framework
+
+system:
+  os: [windows, macos, linux]
+  python: ">=3.8"
+  disk_mb: 3000
+
+dependencies:
+  python:
+    - torch
+    - torchvision
+
+installation:
+  binary: python
+  version_cmd: python -c "import torch; print(torch.__version__)"
+
+functionality:
+  - name: 版本
+    cmd: python -c "import torch; print(torch.__version__)"
+    expect_rc: 0
+    timeout: 15
+  - name: CUDA可用
+    cmd: python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+    expect_rc: 0
+    timeout: 15
+  - name: Tensor测试
+    cmd: python -c "import torch; t=torch.rand(3,3); print(t.shape)"
+    expect_rc: 0

@@ -1,0 +1,22 @@
+name: Redis
+description: In-memory data store
+
+system:
+  os: [windows, macos, linux]
+  disk_mb: 200
+
+installation:
+  binary: redis-cli
+  version_cmd: redis-cli --version
+
+ports:
+  - 6379
+
+functionality:
+  - name: 版本
+    cmd: redis-cli --version
+    expect_rc: 0
+  - name: Ping测试
+    cmd: redis-cli -h 127.0.0.1 ping
+    expect_rc: 0
+    timeout: 5
