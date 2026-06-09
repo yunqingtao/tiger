@@ -1,18 +1,17 @@
 name: Build APK
-
 on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'PWA URL'
+        description: 'Pwa URL'
         required: true
         default: 'https://maryask.com/bot/'
       app_name:
-        description: 'App Name'
+        description: 'App name'
         required: true
         default: '虎哥'
       app_id:
-        description: 'App ID'
+        description: 'App ID (package name)'
         required: true
         default: 'com.maryask.huge'
 
@@ -22,60 +21,84 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 1. Node + 国内镜像
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: 切换npm淘宝镜像
+        run: |
+          npm config set registry https://registry.npmmirror.com
+          npm cache clean --force
 
+      # 2. JDK17
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
+          java-version: 17
           distribution: 'temurin'
-          java-version: '17'
+          cache: gradle
 
+      # 3. Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor
-        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+      # 4. 全局安装Capacitor
+      - name: 安装电容Capacitor
+        run: npm install -g @capacitor/core @capacitor/cli
 
-      - name: Create PWA wrapper
+      # 5. 修复后的网页生成逻辑（无YAML语法错误）
+      - name: 创建PWA网页目录www
         run: |
-          mkdir -p www
-          cat > www/package.json << 'EOF'
-          {
-            "name": "${{ inputs.app_id }}",
-            "version": "1.0.0",
-            "scripts": { "build": "echo done" }
-          }
-          EOF
-          cat > www/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html><head><meta charset="utf-8">
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>${{ inputs.app_name }}</title>
-          <style>
-          *{margin:0;padding:0}
-          body,html{width:100%;height:100%;overflow:hidden}
-          iframe{width:100%;height:100%;border:none}
-          </style>
-          </head><body>
-          <iframe src="${{ inputs.url }}"></iframe>
-          </body></html>
-          EOF
+          mkdir -p ./www
+          cat > ./www/index.html <<-'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;}
+html{width:100%;height:100%;}
+body{width:100%;height:100%;overflow:hidden;}
+iframe{position:fixed;width:100%;height:100%;border:none;}
+.splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99;display:flex;align-items:center;justify-content:center;}
+h1{color:#333;}
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <h1>APP_NAME_PLACEHOLDER</h1>
+</div>
+<iframe src="URL_PLACEHOLDER" onload="document.getElementById('splash').style.display='none'"></iframe>
+</body>
+</html>
+HTML
+          sed -i "s|APP_NAME_PLACEHOLDER|${{ github.event.inputs.app_name }}|g" ./www/index.html
+          sed -i "s|URL_PLACEHOLDER|${{ github.event.inputs.url }}|g" ./www/index.html
 
-      - name: Init Capacitor
-        working-directory: www
+      # 6. 初始化Capacitor（合法webDir=./www）
+      - name: 初始化Capacitor项目
+        run: npx cap init "${{ github.event.inputs.app_name }}" "${{ github.event.inputs.app_id }}" --web-dir=./www
+
+      # 7. 添加安卓平台
+      - name: 添加Android原生项目
+        run: npx cap add android
+
+      # 8. 同步资源
+      - name: 同步网页资源至安卓项目
+        run: npx cap sync android
+
+      # 9. Gradle编译，阿里云镜像加速
+      - name: 构建APK
+        working-directory: ./android
         run: |
-          npx cap init "${{ inputs.app_name }}" "${{ inputs.app_id }}" --web-dir=.
-          npx cap add android
+          echo "systemProp.gradle.wrapperUrl=https://mirrors.aliyun.com/maven/gradle/gradle-wrapper.jar" >> gradle.properties
+          ./gradlew assembleDebug
 
-      - name: Build APK
-        working-directory: www/android
-        run: ./gradlew assembleDebug
-
-      - name: Upload APK
+      # 10. 上传APK
+      - name: 上传APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.app_name }}-apk
-          path: www/android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-debug-apk
+          path: ./android/app/build/outputs/apk/debug/app-debug.apk
