@@ -10,7 +10,7 @@ on:
       app_name:
         description: App Name
         required: true
-        default: 虎哥
+        default: huge
       app_id:
         description: App ID
         required: true
@@ -21,49 +21,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v3
 
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Create PWA wrapper
+      - name: Create wrapper
         run: |
           mkdir -p www
-          printf '{"name":"%s","version":"1.0.0","scripts":{"build":"echo ok"}}' "$APP_ID" > www/package.json
-          printf '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>%s</title><style>*{margin:0;padding:0}body,html{width:100%%;height:100%%;overflow:hidden}iframe{width:100%%;height:100%%;border:none}</style></head><body><iframe src="%s"></iframe></body></html>' "$APP_NAME" "$APP_URL" > www/index.html
-        env:
-          APP_URL: ${{ inputs.url }}
-          APP_NAME: ${{ inputs.app_name }}
-          APP_ID: ${{ inputs.app_id }}
+          echo '<html><body><iframe src="${{ inputs.url }}" style="width:100%;height:100%;border:none"></iframe></body></html>' > www/index.html
+          echo '{"name":"${{ inputs.app_id }}","version":"1.0.0"}' > www/package.json
 
-      - name: Init Capacitor
+      - name: Init and Add Android
         working-directory: www
         run: |
-          npx cap init "$APP_NAME" "$APP_ID" --web-dir=.
+          npx cap init "${{ inputs.app_name }}" "${{ inputs.app_id }}" --web-dir=.
           npx cap add android
-        env:
-          APP_NAME: ${{ inputs.app_name }}
-          APP_ID: ${{ inputs.app_id }}
 
       - name: Build APK
         working-directory: www/android
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.app_name }}-apk
+          name: ${{ inputs.app_name }}
           path: www/android/app/build/outputs/apk/debug/app-debug.apk
