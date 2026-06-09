@@ -41,15 +41,15 @@ jobs:
 
       - name: Create PWA wrapper
         run: |
-          mkdir -p app
-          cat > app/package.json << 'PJSON'
+          mkdir -p www
+          cat > www/package.json << 'PJSON'
           {
             "name": "${{ inputs.app_id }}",
             "version": "1.0.0",
             "scripts": { "build": "echo done" }
           }
           PJSON
-          cat > app/index.html << 'HTML'
+          cat > www/index.html << 'HTML'
           <!DOCTYPE html>
           <html><head><meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -69,17 +69,17 @@ jobs:
           HTML
 
       - name: Init Capacitor
-        working-directory: app
+        working-directory: www
         run: |
           npx cap init "${{ inputs.app_name }}" "${{ inputs.app_id }}" --web-dir=.
           npx cap add android
 
       - name: Build APK
-        working-directory: app/android
+        working-directory: www/android
         run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.app_name }}-debug
-          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          path: www/android/app/build/outputs/apk/debug/app-debug.apk
