@@ -1,17 +1,18 @@
 name: Build APK
+
 on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'Pwa URL'
+        description: 'PWA URL'
         required: true
         default: 'https://maryask.com/bot/'
       app_name:
-        description: 'App name'
+        description: 'App Name'
         required: true
         default: '虎哥'
       app_id:
-        description: 'App ID (package name)'
+        description: 'App ID'
         required: true
         default: 'com.maryask.huge'
 
@@ -21,82 +22,60 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 配置Node + 淘宝镜像，解决外网下载慢
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: 切换npm国内镜像
-        run: |
-          npm config set registry https://registry.npmmirror.com
-          npm cache clean --force
 
-      # 2. 配置JDK17
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 17
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
 
-      # 3. 安装Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 4. 全局安装Capacitor
-      - name: 安装电容Capacitor
-        run: npm install -g @capacitor/core @capacitor/cli
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      # 5. 关键修复：创建标准www目录，网页放入www，不再用 . 作为webDir
-      - name: 创建PWA网页目录www
+      - name: Create PWA wrapper
         run: |
-          mkdir -p ./www
-          cat > ./www/index.html << EOF
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-*{margin:0;padding:0;}
-html{width:100%;height:100%;}
-body{width:100%;height:100%;overflow:hidden;}
-iframe{position:fixed;width:100%;height:100%;border:none;}
-.splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99;display:flex;align-items:center;justify-content:center;}
-h1{color:#333;}
-</style>
-</head>
-<body>
-<div class="splash" id="splash">
-  <h1>${{ github.event.inputs.app_name }}</h1>
-</div>
-<iframe src="${{ github.event.inputs.url }}" onload="document.getElementById('splash').style.display='none'"></iframe>
-</body>
-</html>
-EOF
+          mkdir -p www
+          cat > www/package.json << 'EOF'
+          {
+            "name": "${{ inputs.app_id }}",
+            "version": "1.0.0",
+            "scripts": { "build": "echo done" }
+          }
+          EOF
+          cat > www/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html><head><meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>${{ inputs.app_name }}</title>
+          <style>
+          *{margin:0;padding:0}
+          body,html{width:100%;height:100%;overflow:hidden}
+          iframe{width:100%;height:100%;border:none}
+          </style>
+          </head><body>
+          <iframe src="${{ inputs.url }}"></iframe>
+          </body></html>
+          EOF
 
-      # 6. 修复初始化命令：--web-dir=./www 合法目录
-      - name: 初始化Capacitor项目
-        run: npx cap init "${{ github.event.inputs.app_name }}" "${{ github.event.inputs.app_id }}" --web-dir=./www
-
-      # 7. 添加安卓平台
-      - name: 添加Android原生项目
-        run: npx cap add android
-
-      # 8. 同步资源、更新插件
-      - name: 同步网页资源至安卓项目
-        run: npx cap sync android
-
-      # 9. Gradle编译APK（配置阿里云镜像加速）
-      - name: 构建APK
-        working-directory: ./android
+      - name: Init Capacitor
+        working-directory: www
         run: |
-          echo "systemProp.gradle.wrapperUrl=https://mirrors.aliyun.com/maven/gradle/gradle-wrapper.jar" >> gradle.properties
-          ./gradlew assembleDebug
+          npx cap init "${{ inputs.app_name }}" "${{ inputs.app_id }}" --web-dir=.
+          npx cap add android
 
-      # 10. 上传APK产物
-      - name: 上传APK
+      - name: Build APK
+        working-directory: www/android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: ./android/app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ inputs.app_name }}-apk
+          path: www/android/app/build/outputs/apk/debug/app-debug.apk
