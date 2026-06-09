@@ -1,0 +1,85 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'PWA URL'
+        required: true
+        default: 'https://maryask.com/bot/'
+      app_name:
+        description: 'App Name'
+        required: true
+        default: '虎哥'
+      app_id:
+        description: 'App ID (package name)'
+        required: true
+        default: 'com.maryask.huge'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Create PWA wrapper
+        run: |
+          mkdir -p app
+          cat > app/package.json << 'PJSON'
+          {
+            "name": "${{ inputs.app_id }}",
+            "version": "1.0.0",
+            "scripts": { "build": "echo done" }
+          }
+          PJSON
+          cat > app/index.html << 'HTML'
+          <!DOCTYPE html>
+          <html><head><meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>${{ inputs.app_name }}</title>
+          <style>
+            *{margin:0;padding:0;box-sizing:border-box}
+            body,html{width:100%;height:100%;overflow:hidden}
+            iframe{width:100%;height:100%;border:none}
+            .splash{position:fixed;inset:0;background:#170D02;display:flex;align-items:center;justify-content:center;z-index:999}
+            .splash h1{color:#FFAC02;font-size:28px}
+            .splash.hide{display:none}
+          </style>
+          </head><body>
+          <div class="splash" id="splash"><h1>${{ inputs.app_name }}</h1></div>
+          <iframe src="${{ inputs.url }}" id="app" onload="document.getElementById('splash').classList.add('hide')"></iframe>
+          </body></html>
+          HTML
+
+      - name: Init Capacitor
+        working-directory: app
+        run: |
+          npx cap init "${{ inputs.app_name }}" "${{ inputs.app_id }}" --web-dir=.
+          npx cap add android
+
+      - name: Build APK
+        working-directory: app/android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app_name }}-debug
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
